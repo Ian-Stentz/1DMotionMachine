@@ -5,7 +5,8 @@ class Motion extends Phaser.Scene {
         this.my = {sprite: {}};
         this.my.projectiles = [];
         this.speed = 5;
-        this.projectileSpeed = 2;
+        this.projectileSpeed = 8;
+        this.playerWidth = 160;
 
         this.startX = 400;
         this.startY = 500;
@@ -15,6 +16,7 @@ class Motion extends Phaser.Scene {
     }
 
     preload() {
+        this.canvas = this.sys.game.canvas;
         this.load.setPath("./assets/");
 
         this.load.image("body", "yellow_body_squircle.png");
@@ -32,13 +34,15 @@ class Motion extends Phaser.Scene {
         //keybinds
         this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        this.input.on('pointerdown', () => {
+        this.keySpace.on('down', () => {
             this.fireProjectile()
         })
     }
 
     update() {
+        let {width, height} = this.canvas;
         let my = this.my;   // create an alias to this.my for readability
         let velocity = [0,0]
 
@@ -53,6 +57,8 @@ class Motion extends Phaser.Scene {
         if(vd > 0) {
             this.pos[0] += velocity[0] / vd * this.speed
             this.pos[1] += velocity[1] / vd * this.speed
+            this.pos[0] = this.clamp(this.pos[0], this.playerWidth / 2, width - this.playerWidth / 2)
+            this.pos[1] = this.clamp(this.pos[1], this.playerWidth / 2, height - this.playerWidth / 2)
             my.sprite.body.x = this.pos[0];
             my.sprite.body.y = this.pos[1];
             my.sprite.face.x = this.pos[0] + this.faceOffset[0];
@@ -81,5 +87,15 @@ class Motion extends Phaser.Scene {
 
     length(pos) {
         return Math.sqrt(pos[0] ** 2 + pos[1] ** 2);
+    }
+
+    clamp(x, min, max) {
+        if (x < min) {
+            return min
+        } else if (x > max) {
+            return max
+        } else {
+            return x
+        }
     }
 }
